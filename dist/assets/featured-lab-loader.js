@@ -1,0 +1,2 @@
+const root=document.querySelector('[data-featured-lab]');
+if(root){const load=()=>import('./lab/featured-lab.js').then(m=>m.mount(root)).catch(()=>{root.querySelector('.lab-scene-status').textContent='Preview unavailable — case studies are available below.';});const observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();load();}},{rootMargin:'200px'});observer.observe(root);}

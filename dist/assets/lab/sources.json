@@ -1,0 +1,9 @@
+{
+  "cognicompass": {
+    "captured": "2026-11-03",
+    "screens": ["https://ta31brainboost.me/dashboard", "https://ta31brainboost.me/habits", "https://ta31brainboost.me/progress", "https://ta31brainboost.me/games"],
+    "note": "Real interface captures from a guest demonstration session; no user health records or fabricated interface screens. Scores are demonstration content, not evidence of clinical validity."
+  },
+  "emissions": {"source":"../shiny/explorer.json","geometry":"Facility coordinates from saved project extract; industry totals preserve all source flows. Up to 12 highest-mass sampled facility records per industry and reporting year."},
+  "wine": {"results":"../wine/results.json","sandbox":"Hand-written illustrative function in src/lab/data.js. No trained model or endpoint is connected."}
+}

@@ -47,3 +47,20 @@ Open the repository, choose Code > Codespaces > Create codespace. The dev-contai
 ## Check edits
 
 Run `python3 scripts/check_site.py` before publishing. No package installation is required.
+
+## Featured project lab
+
+The home and Work pages share a progressive Three.js project lab. The rest of the site remains buildless HTML. Three.js and GSAP are loaded only when a desktop scene is needed; mobile and reduced-motion visitors get a still preview with the same data controls and case-study links. Mobile visitors can explicitly enable 3D.
+
+To change the lab implementation:
+
+```sh
+npm ci
+npm run build
+npm run check
+npm run preview
+```
+
+Edit `src/lab/controller.js` for controls, `src/lab/scene.js` for geometry/camera/lighting, `src/lab/data.js` for the explicitly illustrative input formula, and `dist/assets/featured-lab.css` for layout. Commit both source and generated `dist/assets/lab/` files. The build regenerates the emissions preview from the unchanged saved source extract and bundles the scene locally; no CDN runtime imports are used.
+
+Actual CogniCompass captures and their provenance are in `dist/assets/lab/`. Wine model errors are saved evaluation results; slider outputs are separately labelled illustrative and must never be described as actual model inference without a verified implementation or endpoint.

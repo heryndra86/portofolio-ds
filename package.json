@@ -1,0 +1,17 @@
+{
+  "name": "gifhari-portfolio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-lab.mjs",
+    "check": "python3 scripts/check_site.py && node --test tests/featured-data.test.mjs",
+    "preview": "python3 -m http.server 8000 --directory dist"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "kind": "fresh audit of submitted cleaned outputs",
+  "scope": "arithmetic, missingness, order-ID uniqueness and Melbourne calendar seasons; not raw-data cleaning reproduction",
+  "results": [
+    {
+      "dataset": "dirty_data",
+      "rows": 500,
+      "missing_cells": 1,
+      "duplicate_order_ids": 0,
+      "formula_check_rows": 500,
+      "order_total_mismatches": 0,
+      "formula_tolerance": 0.02,
+      "season_mismatches": 0,
+      "negative_delivery_charges": 0,
+      "unexpected_columns": []
+    },
+    {
+      "dataset": "missing_data",
+      "rows": 500,
+      "missing_cells": 0,
+      "duplicate_order_ids": 0,
+      "formula_check_rows": 500,
+      "order_total_mismatches": 40,
+      "formula_tolerance": 0.02,
+      "season_mismatches": 0,
+      "negative_delivery_charges": 0,
+      "unexpected_columns": []
+    },
+    {
+      "dataset": "outlier_data",
+      "rows": 491,
+      "missing_cells": 0,
+      "duplicate_order_ids": 0,
+      "formula_check_rows": 491,
+      "order_total_mismatches": 0,
+      "formula_tolerance": 0.02,
+      "season_mismatches": 0,
+      "negative_delivery_charges": 0,
+      "unexpected_columns": [
+        "order_price_is_outlier",
+        "delivery_charges_is_outlier",
+        "customer_lat_is_outlier",
+        "customer_long_is_outlier",
+        "coupon_discount_is_outlier",
+        "order_total_is_outlier",
+        "distance_to_nearest_warehouse_is_outlier"
+      ]
+    }
+  ]
+}

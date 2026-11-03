@@ -1,0 +1,823 @@
+---
+title: "AI-Powered Financial Modeling for Soccer Club Valuation"
+author: "m.gifhari heryndra"
+date: "2025-05-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+## 1.Library and data loading
+
+
+```{r}
+
+# Load the libraries
+# Original Keras library call is preserved but not executed because
+# the training chunk now uses the Keras 3 interface.
+
+library(keras3)
+library(tensorflow)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(corrr)
+library(plotly)
+library(randomForest)
+library(ggthemes)
+library(patchwork)
+library(cluster)
+
+
+
+
+
+
+finance_df <- read.csv("~/Documents/final project of monash data science/FIT 5145/archive/football_clubs_financials_combined.csv")
+perform_df <- read.csv("~/Documents/final project of monash data science/FIT 5145/archive/performance_stats_2020_2024.csv")
+merge_df <- read.csv("~/Documents/Semester 1 2025/FIT 5145/Assignment 1/archive/clean11.csv")
+
+```
+### Dataset about
+## 2.Data Sources and Loading
+
+For this project, we used data from multiple sources to build a comprehensive dataset for football club valuation:
+
+1. **Kaggle Dataset**  
+   Player performance data was downloaded from Kaggle using the following API call:
+   
+   bash
+   curl -L -o ~/Downloads/player-scores.zip \
+     https://www.kaggle.com/api/v1/datasets/download/davidcariboo/player-scores
+     
+2.This dataset includes player-level statistics such as goals, assists, match ratings, and more, covering the 2020–2024 seasons.
+The data was extracted and processed into a club-level performance dataset:
+performance_stats_2020_2024.csv.
+
+Financial Data
+Financial data was sourced from a combination of:
+
+Official financial reports (e.g., Manchester United)
+
+Synthetic data:
+I created synthetic financial data to simulate valuations for clubs where public reports were not available.
+This synthetic data was based on patterns in real financial reports and includes columns such as:
+-revenue
+-net_profit
+-transfer_spending
+-club_name
+The combined financial data is stored as:
+football_clubs_financials_combined.csv.
+
+3.Final Merged Dataset
+After cleaning and standardizing club names across datasets, I merged the financial and performance data into a single master dataset:This dataset includes performance metrics, financial indicators, standardized club names, and engineered features
+
+### 2.Data wrangling
+
+This included handling missing values, correcting data types, and standardizing formats across multiple sources such as club names, financial metrics, and performance statistics. In particular, key features such as revenue, losses, wins, and losses were carefully checked for anomalies and inconsistencies. Additional calculated columns, such as net profit/loss and win ratios, were also introduced to provide deeper insights. Through this process, the dataset was prepared for effective visualization, modeling, and interpretation, ensuring that subsequent analyses reflect the true state of club finances and performance.
+
+```{r}
+
+colnames(finance_df)
+
+```
+```{r}
+financial_clubs <- c(
+  "manchester-united", "real-madrid", "fc-barcelona", "liverpool",
+  "manchester-city", "bayern-munich", "paris-saint-germain", "tottenham-hotspur",
+  "chelsea", "arsenal", "juventus", "borussia-dortmund", "atletico-madrid",
+  "ac-milan", "inter-milan", "west-ham-united", "los-angeles-fc", "inter-miami-cf",
+  "la-galaxy", "atlanta-united-fc"
+)
+```
+
+
+```{r}
+matched_perf_df <- merge_df %>%
+  filter(club_code %in% financial_clubs)
+
+# Show matched clubs
+print(matched_perf_df[, c("name", "club_code","squad_size", "stadium_seats")])
+```
+
+```{r}
+
+# Mapping from short name (in revenue_data) to full name (in clubs_data)
+club_mapping <- tibble::tribble(
+  ~short_name, ~full_name,
+  "AC Milan", "Associazione Calcio Milan",
+  "Arsenal", "Arsenal Football Club",
+  "Bayern Munich", "FC Bayern München",
+  "Real Madrid", "Real Madrid Club de Fútbol",
+  "Liverpool", "Liverpool Football Club",
+  "Manchester United", "Manchester United Football Club",
+  "Manchester City", "Manchester City Football Club",
+  "Chelsea", "Chelsea Football Club",
+  "Juventus", "Juventus Football Club",
+  "Tottenham Hotspur", "Tottenham Hotspur Football Club",
+  "Inter Milan", "Football Club Internazionale Milano S.p.A.",
+  "Borussia Dortmund", "Borussia Dortmund",
+  "West Ham United", "West Ham United Football Club",
+  "Paris Saint-Germain", "Paris Saint-Germain Football Club",
+  "Atletico Madrid", "Club Atlético de Madrid S.A.D."
+)
+```
+
+
+```{R}
+clean_club_name <- function(name_vec) {
+  name_vec %>%
+    tolower() %>%
+    gsub(" ", "-", .) %>%
+    gsub("[^a-z0-9\\-]", "", .)
+}
+```
+
+```{r}
+# Add short_name to clubs_data using mapping
+clubs_data <- matched_perf_df %>%
+  left_join(club_mapping, by = c("name" = "full_name"))
+```
+
+```{r}
+# Rename club column for clarity
+colnames(finance_df)[1] <- "short_name"
+```
+
+```{r}
+# Merge datasets
+final_dataset_2 <- left_join(finance_df, clubs_data, by = "short_name")
+```
+
+```{r}
+# Make all column names lowercase
+perform_df <- perform_df %>% rename_with(~ tolower(.))
+final_dataset_2 <- final_dataset_2 %>% rename_with(~ tolower(.))
+```
+
+```{r}
+
+# Rename clean_club_name to club_name_clean in final_dataset_2
+final_dataset_2 <- final_dataset_2 %>%
+  rename(club_name_clean = club_code)
+```
+
+```{r}
+final_dataset_2 <- final_dataset_2 %>%
+  group_by(club_name_clean , year) %>%
+  slice(1) %>%
+  ungroup()
+```
+
+```{r}
+perform_df <- perform_df %>%
+  group_by(club_name_clean, year) %>%
+  slice(1) %>%    # Keeps the first row of each duplicated group
+  ungroup()
+```
+
+```{R}
+merged_df <- left_join(
+  perform_df,
+  final_dataset_2,
+  by = c("club_name_clean", "year")
+)
+```
+
+```{r}
+colSums(is.na(merged_df))
+```
+
+```{r}
+merge_df %>%
+  summarise_all(~ sum(is.na(.))) %>%
+  pivot_longer(everything(), names_to = "column", values_to = "missing_count") %>%
+  filter(missing_count > 0) %>%
+  arrange(desc(missing_count))
+```
+
+```{r}
+
+financial_clubs <- c(
+  "manchester-united", "real-madrid", "fc-barcelona", "liverpool",
+  "manchester-city", "bayern-munich", "paris-saint-germain", "tottenham-hotspur",
+  "chelsea", "arsenal", "juventus", "borussia-dortmund", "atletico-madrid",
+  "ac-milan", "inter-milan", "west-ham-united"
+)
+
+```
+
+```{r}
+# Filter financial data to include only target clubs
+finance_df <- finance_df[finance_df$club_name_clean %in% financial_clubs, ]
+```
+
+```{r}
+# Define target financial clubs
+financial_clubs <- c(
+  "manchester-united", "real-madrid", "fc-barcelona", "liverpool",
+  "manchester-city", "bayern-munich", "paris-saint-germain", "tottenham-hotspur",
+  "chelsea", "arsenal", "juventus", "borussia-dortmund", "atletico-madrid",
+  "ac-milan", "inter-milan", "west-ham-united"
+)
+
+# Filter only these clubs
+filtered_df <- merged_df[merged_df$club_name_clean %in% financial_clubs, ]
+```
+
+### 3.Explanatory Data analysis
+
+```{r}
+# Summary stats
+cat("Summary Statistics:\n")
+summary(merged_df)
+```
+### summary analysis
+
+The combined dataset consists of financial and performance data for 80 football clubs from 2020 to 2024. The data includes variables such as total games played (fixed at 38 per year), wins (ranging from 18 to 30), draws, losses, goals scored, and goals conceded. Clubs recorded between 55 to 146 assists, 41 to 79 yellow cards, and up to 5 red cards. Financial metrics include revenue streams (contracts, commercial, broadcasting, matchday) and operational costs (operating expenses, employee benefits, depreciation, amortization). Some clubs have negative values for expenses (denoting expenditures), with minimums like -726,253 for operating expenses and -387,073 for employee benefits. Profitability varies, with operating profits or losses, finance costs, and net finance income differing across clubs. Exceptional items are mostly zero, and there are occasional missing values across 10 entries in various financial fields. Overall, this data offers a comprehensive overview of club performance, revenue generation, and financial health over the five-year period.
+
+```{r}
+# Example: Distribution of Revenue
+ggplot(merged_df, aes(x = revenue_from_contracts)) +
+  geom_histogram(bins = 15, fill = "steelblue") +
+  labs(title = "Distribution of Club Revenue", x = "Revenue (£M)", y = "Frequency")
+
+# Boxplot of Losses
+ggplot(merged_df, aes(y = loss_for_the_year, x = club_name_clean)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(title = "Annual Loss by Club")
+```
+###Boxplot analysis
+The boxplot titled **"Annual Loss by Club"** provides a comparative analysis of the annual losses (`loss_for_the_year`) across various soccer clubs. The visualization reveals significant variability in financial performance, with some clubs experiencing consistently higher losses than others. For instance, **West Ham United** shows the highest median loss, indicating it has faced substantial financial challenges compared to other clubs. In contrast, **Real Madrid** and **Bayern Munich** exhibit relatively lower median losses, suggesting stronger financial stability or more effective cost management. The interquartile ranges (IQRs) for most clubs are wide, highlighting the volatility in annual losses, which could be attributed to factors such as fluctuating revenue streams, player transfer expenses, or operational costs. Notably, outliers are present in several distributions, signaling occasional years with exceptionally high losses that may warrant further investigation into specific events or decisions impacting club finances. This analysis underscores the importance of robust financial modeling and risk management strategies for maintaining long-term sustainability in elite soccer.
+
+
+```{r}
+
+# Convert to plotly scatter plot
+p1 <- plot_ly(
+  merged_df,
+  x = ~ revenue_from_contracts,
+  y = ~ loss_for_the_year,
+  color = ~ club_name_clean,
+  type = 'scatter',
+  mode = 'markers',
+  size = ~ broadcasting_revenue,
+  sizes = c(5, 20),
+  hoverinfo = "text",
+  text = ~ paste("Club: ", club_name_clean, "<br>",
+                "Revenue: £", revenue_from_contracts, "<br>",
+                "Loss: £", loss_for_the_year, "<br>",
+                "Broadcasting: £", broadcasting_revenue)
+)
+
+p1 %>% layout(title = "Revenue vs Loss - Interactive View")
+```
+###Scatter plot analysis
+The visualizations highlight that high revenue does not always equate to financial stability. Clubs like Manchester United and Real Madrid, despite significant revenue, face considerable losses, while clubs like AC Milan and Arsenal maintain lower losses with relatively lower revenue, indicating efficient cost management. Bayern Munich exemplifies operational efficiency by balancing high revenue and low losses, whereas clubs like West Ham United and Tottenham Hotspur, with consistently high losses, may need to reassess their financial strategies. The market dynamics further show how varying strategies in player transfers, revenue streams, and operational choices shape club finances—high-revenue clubs often take on higher risks with investments, while lower-revenue clubs lean toward cost-cutting for sustainability.
+```{r}
+
+# Select revenue streams and remove rows with NA values
+revenue_df <- merged_df %>%
+  select(club_name_clean, year, commercial_revenue, broadcasting_revenue, matchday_revenue) %>%
+  filter(!is.na(commercial_revenue), 
+         !is.na(broadcasting_revenue), 
+         !is.na(matchday_revenue))
+
+# Reshape data from wide to long format
+revenue_long <- revenue_df %>%
+  pivot_longer(
+    cols = -c(club_name_clean, year),
+    names_to = "revenue_type",
+    values_to = "amount"
+  )
+
+# Plot stacked bar chart
+p1 <- ggplot(revenue_long, aes(x = as.factor(year), y = amount, fill = revenue_type)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ club_name_clean, scales = "free_y") +  # Free y-scale per club for clarity
+  labs(title = "Revenue Streams by Club and Year", 
+       x = "Year", 
+       y = "Revenue (£M)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45))
+
+# Convert to interactive plot
+ggplotly(p1)
+
+```
+
+### Revenue streams across top clubs
+
+The analysis highlights that top clubs like Manchester United, Real Madrid, and Bayern Munich generate substantial revenue from broadcasting rights and commercial deals, reflecting their global appeal and brand strength, while matchday revenue contributes moderately. In contrast, mid-tier clubs such as West Ham United and Borussia Dortmund show a more balanced but smaller revenue distribution across broadcasting, commercial, and matchday sources, with year-over-year growth impacted by fluctuating league standings. Strategically, clubs with diversified revenue streams are better positioned against market volatility, with broadcasting and commercial revenues being the primary growth drivers. Matchday income, though smaller, remains vital for clubs with strong local fan bases. The insights underscore the importance of global fan engagement, brand development, and effective utilization of stadium capacity in shaping a club’s financial stability and growth trajectory.
+```{r}
+# Plot relationship between win ratio and losses
+  final_dataset <- merged_df %>%
+  mutate(win_ratio = wins / total_games)
+p2 <- plot_ly(
+  final_dataset,
+  x = ~ win_ratio,
+  y = ~ loss_for_the_year,
+  color = ~ club_name_clean,
+  type = 'scatter',
+  mode = 'markers',
+  size = ~ goals_scored,
+  sizes = c(5, 20),
+  text = ~ paste("Club: ", club_name_clean, "<br>",
+                 "Win Ratio: ", win_ratio, "<br>",
+                 "Loss: £", loss_for_the_year, "<br>",
+                 "Goals Scored: ", goals_scored)
+) %>%
+  layout(title = "Win Ratio vs Annual Loss",
+         xaxis = list(title = "Win %"),
+         yaxis = list(title = "Loss (£M)"))
+
+p2
+```
+### analysis correlation between club win ration and annual losses
+
+The analysis reveals no strong linear correlation between a club’s win ratio and its annual losses, suggesting that performance on the field does not directly predict financial health. High-performing clubs like Manchester United and Real Madrid, despite strong win ratios, face significant losses, likely due to high player costs and transfers. In contrast, clubs like West Ham United suffer higher losses despite lower win ratios, highlighting potential inefficiencies or strategic issues. Some clubs, like Arsenal and Chelsea, demonstrate balanced performance, maintaining moderate win ratios and lower losses, indicating effective financial management. Overall, while high-performing clubs may earn more through broadcasting and sponsorships, these gains are often offset by increased expenses, whereas lower-performing clubs risk financial strain due to reduced revenue streams. 
+```{r}
+# Bubble chart: Revenue vs Operating Expenses
+p3 <- plot_ly(
+  final_dataset,
+  x = ~ revenue_from_contracts,
+  y = ~ total_operating_expenses,
+  color = ~ club_name_clean,
+  size = ~ employee_benefit_expenses,
+  type = 'scatter',
+  mode = 'markers',
+  text = ~ paste("Club: ", club_name_clean, "<br>",
+                 "Revenue: £", format(revenue_from_contracts, big.mark = ","),
+                 "<br>Expenses: £", format(total_operating_expenses, big.mark = ","))
+) %>%
+  layout(title = "Revenue vs Operating Expenses",
+         xaxis = list(title = "Total Revenue (£M)"),
+         yaxis = list(title = "Total Operating Expenses (£M)"))
+
+p3
+
+```
+### Revenue vs operation expenses
+The analysis highlights that there is no strong linear correlation between total revenue and total operating expenses among football clubs. High-revenue clubs like Manchester United and Real Madrid tend to have higher operating expenses, possibly due to investments in player wages and transfers. Conversely, clubs like West Ham United exhibit lower revenues but still maintain high operating expenses, suggesting inefficiencies or strategic issues. Mid-range clubs such as Arsenal, Chelsea, and Liverpool demonstrate balanced performance, with moderate revenues and expenses, indicating effective financial management. While high-performance clubs may earn significant income from broadcasting, sponsorships, and matchday revenue, these gains are often offset by substantial costs.
+
+
+
+```{r}
+
+# Plot revenue trends for top clubs
+top_clubs <- c("manchester-united", "real-madrid", "fc-barcelona", "liverpool", "bayern-munich")
+
+final_dataset %>%
+  filter(club_name_clean %in% top_clubs) %>%
+  ggplot(aes(x = year, y = revenue_from_contracts, color = club_name_clean)) +
+  geom_line() +
+  labs(title = "Revenue Trends for Top European Clubs (2020–2024)",
+       x = "Year", y = "Revenue (£M)") +
+  theme_minimal()
+```
+```{r}
+# Define target clubs
+target_clubs <- c(
+  "manchester-united", 
+  "real-madrid", 
+  "arsenal", 
+  "chelsea", 
+  "bayern-munich"
+)
+
+# Filter dataset
+five_clubs_df <- final_dataset %>%
+  filter(club_name_clean %in% target_clubs)
+
+# Show filtered data
+print(five_clubs_df)
+```
+```{r}
+# Plot Stadium Size vs Revenue
+# Step 1: Filter data for "Manchester United"
+manu_data <- final_dataset %>%
+  filter(club_name_clean == "manchester-united") %>%
+  select(year, revenue_from_contracts, loss_for_the_year)
+
+# Check if data exists
+if (nrow(manu_data) == 0) {
+  stop("No data found for Manchester United.")
+}
+
+# Ensure year is numeric
+manu_data$year <- as.numeric(manu_data$year)
+```
+
+```{r}
+
+library(forecast)
+
+# Step 2: Convert to time series
+manu_ts <- ts(
+  manu_data[, -1],  # Exclude the 'year' column
+  start = min(manu_data$year),
+  frequency = 1
+)
+
+# Step 3: Plot using autoplot (from forecast package) + convert to plotly
+p <- autoplot(manu_ts) +
+  ggtitle("Manchester United Revenue & Loss (2020–2024)") +
+  ylab("£ (Thousands)") +
+  scale_color_manual(values = c("revenue_from_contracts" = "green", "loss_for_the_year" = "red")) +
+  theme_minimal()
+
+# Step 4: Convert to interactive plotly object
+ggplotly(p)
+
+```
+
+```{r}
+p <- ggplot(final_dataset, aes(x = revenue_from_contracts, y = loss_for_the_year)) +
+  geom_point(aes(label = club_name_clean), size = 3) +
+  geom_smooth(method = "lm", col = "red") +
+  labs(title = "Revenue vs Annual Loss", x = "Revenue (£M)", y = "Loss (£M)") +
+  theme_minimal()
+
+# Convert to interactive plotly object
+ggplotly(p) %>%
+  style(hover.label.bgcolor = "white")
+```
+
+```{r}
+# Add win_ratio if not already done
+final_dataset <- final_dataset %>%
+  mutate(win_ratio = wins / total_games)
+
+# Create the base ggplot
+p <- ggplot(final_dataset, aes(x = win_ratio, y = operating_profit_or_loss)) +
+  geom_point(aes(color = club_name_clean), size = 3) +
+  geom_smooth(method = "lm", col = "blue") +
+  labs(title = "Win Ratio vs Operating Result", x = "Win %", y = "Operating Result (£M)") +
+  theme_minimal()
+
+# Convert to interactive plotly object
+ggplotly(p, tooltip = c("win_ratio", "operating_profit_or_loss", "club_name_clean")) %>%
+  style(hover.label.bgcolor = "white")
+```
+##correlation
+
+```{r}
+
+# Extract individual time series
+revenue_ts <- manu_ts[, "revenue_from_contracts"]
+loss_ts <- manu_ts[, "loss_for_the_year"]
+
+# Plot Revenue with Plotly
+p_revenue <- autoplot(revenue_ts) +
+  labs(title = "Manchester United Revenue Over Time", y = "Revenue (£M)") +
+  theme_minimal()
+
+# Convert to interactive plot
+ggplotly(p_revenue)
+
+# Plot Loss with Plotly
+p_loss <- autoplot(loss_ts) +
+  labs(title = "Manchester United Loss Over Time", y = "Loss (£M)") +
+  theme_minimal()
+
+# Convert to interactive plot
+ggplotly(p_loss)
+```
+
+
+```{r}
+target_clubs <- c(
+  "manchester-united", 
+  "real-madrid", 
+  "arsenal",          # Replaced FC Barcelona with Arsenal
+  "chelsea", 
+  "bayern-munich"
+)
+
+# Filter dataset for these clubs
+filtered_df <- final_dataset %>%
+  filter(club_name_clean %in% target_clubs)
+
+# Optional: Select only relevant financial & performance columns
+predictive_df <- filtered_df %>%
+  select(club_name_clean, year,
+         revenue_from_contracts,
+         stadium_seats,
+         net_transfer_record,
+         wins,
+         losses,
+         operating_profit_or_loss)
+
+# Optional: Inspect the result
+cat("Unique clubs in filtered data:\n")
+print(unique(predictive_df$club_name_clean))
+
+cat("\nFirst few rows of predictive_df:\n")
+head(predictive_df)
+```
+
+```{r}
+# Remove rows with missing values in key columns
+predictive_df <- predictive_df %>%
+  drop_na(revenue_from_contracts, operating_profit_or_loss)
+
+# Train Random Forest model
+rf_model <- randomForest(
+  operating_profit_or_loss ~ .,
+  data = predictive_df[, -1],  # Exclude club name
+  ntree = 500,                 # Number of trees
+  importance = TRUE             # Enable feature importance
+)
+
+# Show model summary
+print(rf_model)
+```
+
+```{r}
+# Plot with ggplot2
+importance_df <- as.data.frame(sort(importance(rf_model)[,1], decreasing = TRUE))
+colnames(importance_df) <- "Importance"
+importance_df$Variable <- rownames(importance_df)
+rownames(importance_df) <- NULL
+
+ggplot(importance_df, aes(x = reorder(Variable, Importance), y = Importance)) +
+  geom_point(size = 3, color = "steelblue") +
+  coord_flip() +
+  labs(title = "Random Forest: Feature Importance",
+       x = "Variable",
+       y = "Importance Score") +
+  theme_minimal()
+
+```
+
+Most Important Features
+Year (~5.0): The most critical feature, indicating strong trends over time (e.g., inflation, market shifts, or regulations).
+
+Wins (~4.0): Performance on the pitch is key to predicting the target, likely through its impact on revenue (tickets, broadcasting, sponsorship).
+
+Revenue from Contracts (~2.5): Moderate importance, reflecting the role of commercial deals and sponsorships in driving revenue.
+
+Less Important Features
+Losses (~0.0): Minimal impact, suggesting this variable’s effect is captured indirectly by others like wins or revenue streams.
+
+Stadium Seats (~-2.0): Negative relationship—larger stadiums may lead to higher operational costs or lower utilization, affecting profitability.
+
+Net Transfer Record (~-2.5): Strong negative impact, indicating that aggressive spending on player transfers often correlates with weaker financial performance.
+
+```{r}
+
+
+# Train model
+rf_model <- randomForest(operating_profit_or_loss ~ .,
+                         data = predictive_df[, -1],  # Exclude club name
+                         ntree = 500)
+
+# Feature importance
+importance(rf_model)
+varImpPlot <- importance(rf_model)
+dotchart(sort(varImpPlot[,1]), pch = 4, main = "Feature Importance (Random Forest)")
+```
+
+```{r}
+# Filter Man Utd data
+manu_data <- final_dataset %>%
+  filter(club_name_clean == "manchester-united") %>%
+  select(year, revenue_from_contracts)
+
+# Convert to time series
+revenue_ts <- ts(manu_data$revenue_from_contracts, start = min(manu_data$year), frequency = 1)
+
+# Fit ARIMA model
+arima_model <- auto.arima(revenue_ts)
+summary(arima_model)
+
+# Forecast next 3 years
+forecast_revenue <- forecast(arima_model, h = 3)
+autoplot(forecast_revenue) +
+  ggtitle("Manchester United Revenue Forecast (2025–2027)") +
+  ylab("Revenue (£M)")
+```
+```{r}
+
+# Function to convert forecast object to tidy dataframe
+library(forecast)
+
+club_list <- c(
+  "manchester-united",
+  "real-madrid",
+  "bayern-munich"
+)
+
+forecast_list <- setNames(
+  lapply(club_list, function(club) {
+    club_data <- final_dataset %>%
+      filter(club_name_clean == club) %>%
+      arrange(year)
+
+    stopifnot(
+      nrow(club_data) > 1,
+      !anyNA(club_data$revenue_from_contracts),
+      all(diff(club_data$year) == 1)
+    )
+
+    revenue_ts <- ts(
+      club_data$revenue_from_contracts,
+      start = min(club_data$year),
+      frequency = 1
+    )
+
+    forecast::forecast(
+      forecast::auto.arima(revenue_ts),
+      h = 3,
+      level = c(80, 95)
+    )
+  }),
+  club_list
+)
+
+forecast_to_tibble <- function(fc, club_name) {
+  fc_df <- cbind.data.frame(
+    year = as.numeric(time(fc$mean)),
+    mean = as.numeric(fc$mean),
+    lower80 = as.numeric(fc$lower[,1]),
+    upper80 = as.numeric(fc$upper[,1]),
+    lower95 = as.numeric(fc$lower[,2]),
+    upper95 = as.numeric(fc$upper[,2]),
+    club = club_name,
+    type = "Forecast"
+  )
+  return(fc_df)
+}
+
+# Convert forecasts to a tidy dataframe
+forecast_dfs <- lapply(names(forecast_list), function(club_name) {
+  fc <- forecast_list[[club_name]]
+  
+  # Combine historical data
+  club_data <- final_dataset %>%
+    filter(club_name_clean == club_name) %>%
+    select(year, revenue_from_contracts) %>%
+    rename(mean = revenue_from_contracts) %>%
+    mutate(type = "Historical", club = club_name)
+  
+  # Combine historical with forecast
+  fc_df <- forecast_to_tibble(fc, club_name)
+  
+  bind_rows(club_data, fc_df)
+})
+
+# Combine all club forecasts into one dataframe
+all_forecasts <- bind_rows(forecast_dfs)
+
+# Add factor for consistent ordering
+all_forecasts$club <- factor(all_forecasts$club, levels = club_list)
+
+# Plot each club in a separate facet
+ggplot(all_forecasts, aes(x = year, y = mean, color = type)) +
+  geom_line(size = 1) +
+  geom_ribbon(aes(ymin = lower80, ymax = upper80, fill = type), 
+               alpha = 0.2, show.legend = FALSE) +
+  facet_wrap(~ club, scales = "free_y") +
+  labs(title = "Historical and Forecasted Revenue from Contracts",
+       x = "Year",
+       y = "Revenue (£M)") +
+  theme_minimal() +
+  scale_color_manual(values = c("Historical" = "blue", "Forecast" = "red")) +
+  scale_fill_manual(values = c("Historical" = "blue", "Forecast" = "red"))
+```
+###Forecast the revenue
+Manchester United demonstrates the strongest and most consistent financial performance among the three clubs, with steady revenue growth and minimal fluctuations over time, indicating robust contractual agreements and a stable business model. In contrast, Real Madrid and Bayern Munich faced notable revenue declines in 2022, likely influenced by external factors such as economic downturns, changes in sponsorship deals, and the lingering impact of the COVID-19 pandemic on matchday income. Despite these setbacks, all three clubs show positive revenue forecasts, highlighting their resilience and capacity for recovery, with Manchester United maintaining the highest projected revenue and narrow confidence intervals, reflecting greater predictability and lower risk. Real Madrid and Bayern Munich, while facing wider confidence intervals and higher uncertainty, are on an upward trajectory, suggesting a return to stability. Overall, Manchester United stands out for its financial strength, while Real Madrid and Bayern Munich are navigating recovery, emphasizing the importance of adaptive financial strategies and market responsiveness in maintaining competitive advantage.
+
+Original LSTM code is preserved below for reference. This chunk is not executed; the corrected version follows.
+
+```{r original-lstm, eval=FALSE}
+# Select relevant time-based variables
+lstm_data <- final_dataset %>%
+  filter(club_name_clean == "manchester-united") %>%
+  select(
+    year,
+    revenue_from_contracts,
+    loss_for_the_year,
+    wins,
+    losses,
+    broadcasting_revenue
+  ) %>%
+  na.omit()
+
+# Normalize data
+lstm_scaled <- scale(lstm_data[,-1])
+
+# Create sequences
+look_back <- 3
+create_sequences <- function(data, look_back) {
+  X <- lapply(look_back:nrow(data), function(i) data[(i - look_back + 1):i, ])
+  y <- data[(look_back + 1):nrow(data), 1]
+  list(X = array(unlist(X), dim = c(length(X), ncol(X[[1]]), nrow(X[[1]]))),
+       y = unlist(y))
+}
+
+dataset <- create_sequences(as.matrix(lstm_scaled), look_back)
+
+# Build LSTM model
+model <- keras_model_sequential() %>%
+  layer_lstm(units = 50, input_shape = c(look_back, ncol(dataset$X))) %>%
+  layer_dense(units = 1)
+
+# Compile and train
+model %>% compile(loss = "mse", optimizer = "adam")
+history <- model %>% fit(dataset$X, dataset$y, epochs = 100, verbose = FALSE)
+
+# Plot training history
+plot(history)
+```
+
+```{r}
+
+# Select and order annual observations
+lstm_data <- final_dataset %>%
+  filter(club_name_clean == "manchester-united") %>%
+  arrange(year) %>%
+  select(year, revenue_from_contracts, loss_for_the_year,
+         wins, losses, broadcasting_revenue) %>%
+  tidyr::drop_na()
+
+# Normalize financial and performance variables
+lstm_scaled <- scale(as.matrix(lstm_data[, -1]))
+stopifnot(all(is.finite(lstm_scaled)))
+
+# Each input window predicts revenue in the following year.
+# Tensor dimensions: samples, timesteps, features.
+look_back <- 3L
+create_sequences <- function(data, look_back) {
+  n_samples <- nrow(data) - look_back
+  n_features <- ncol(data)
+  stopifnot(n_samples > 0)
+
+  X <- array(0, dim = c(n_samples, look_back, n_features))
+  y <- matrix(0, nrow = n_samples, ncol = 1)
+
+  for (i in seq_len(n_samples)) {
+    X[i, , ] <- data[i:(i + look_back - 1L), , drop = FALSE]
+    y[i, 1] <- data[i + look_back, 1]
+  }
+
+  list(X = X, y = y)
+}
+
+dataset <- create_sequences(lstm_scaled, look_back)
+stopifnot(dim(dataset$X)[1] == nrow(dataset$y))
+
+# Specify the input shape on the model for Keras 3.
+model <- keras3::keras_model_sequential(
+  input_shape = c(look_back, dim(dataset$X)[3])
+) |>
+  keras3::layer_lstm(units = 50) |>
+  keras3::layer_dense(units = 1)
+
+keras3::compile(model, loss = "mse", optimizer = "adam")
+history <- keras3::fit(
+  model,
+  x = dataset$X,
+  y = dataset$y,
+  epochs = 100,
+  batch_size = 1,
+  shuffle = FALSE,
+  verbose = 0
+)
+
+# Five annual observations provide only two training examples.
+# This training history is illustrative, not a forecast validation.
+plot(history)
+```
+
+```{r}
+manu_ts <- ts(manu_data$revenue_from_contracts, start = 2020, frequency = 1)
+
+autoplot(manu_ts) +
+  autolayer(meanf(manu_ts, h = 3), series = "Mean Forecast") +
+  ggtitle("Manchester United Revenue Over Time")
+```
+```{r}
+
+club_stats <- final_dataset %>%
+  select(
+    revenue_from_contracts,
+    loss_for_the_year,
+    wins,
+    losses,
+  ) %>%
+  na.omit()
+
+pam_result <- pam(club_stats, k = 4)
+print(pam_result)
+
+```
+## optional
+The cluster analysis reveals distinct patterns among football clubs based on revenue, losses, and performance. Cluster 1 (ID 16) stands out with high revenue (~£371,763), moderate losses (~£34,206), and an impressive win record of 29 wins with no losses, suggesting exceptional on-field performance with solid financial management. Cluster 2 (ID 29) demonstrates moderate revenue (~£250,520), lower losses (~£14,078), and a balanced win-loss record (20 wins, 11 losses), indicating a club that maintains reasonable financial stability with average performance. Cluster 3 (ID 63) features high revenue (~£494,049) but also higher losses (~£56,432) than Cluster 2, alongside balanced performance (21 wins, 11 losses), suggesting a club that may rely on higher spending to stay competitive. Lastly, Cluster 4 (ID 51) leads in revenue (~£635,622) but also has the highest losses (~£76,015) with a balanced win-loss record (21 wins, 9 losses), indicating that while the club generates substantial income, it faces challenges in managing expenses. Overall, the clusters highlight varying strategies, where some clubs prioritize high performance and revenue at the cost of higher losses, while others maintain more conservative approaches with balanced results.

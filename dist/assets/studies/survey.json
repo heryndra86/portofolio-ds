@@ -1,0 +1,18 @@
+{
+  "kind": "new Random Forest baseline",
+  "split": "80/20 fixed holdout, seed 42; training-only preprocessing",
+  "regression": {
+    "train_rows": 400,
+    "validation_rows": 100,
+    "rmse": 7.8807,
+    "mean_baseline_rmse": 12.7851
+  },
+  "classification": {
+    "train_rows": 400,
+    "validation_rows": 100,
+    "accuracy": 0.36,
+    "macro_f1": 0.3133,
+    "majority_accuracy": 0.28
+  },
+  "limitations": "Single random split; association, not diagnosis or causation."
+}

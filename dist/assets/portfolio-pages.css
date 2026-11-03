@@ -1,0 +1,19 @@
+.skip-link{position:fixed;top:8px;left:12px;z-index:1000;padding:12px 18px;background:#fff;color:#24221f;transform:translateY(-160%)}.skip-link:focus{transform:none}
+.page-shell{max-width:none}.page-shell .nav{gap:clamp(14px,1.7vw,28px);font-size:12px}.page-shell .nav a{position:relative;padding-block:9px}.page-shell .nav a[aria-current=page]:after{content:'';position:absolute;left:0;right:0;bottom:2px;height:2px;background:currentColor}.page-shell .status{font-size:8px}
+.portfolio-home .site-footer{display:none}
+.portfolio-inner{background:#f5f0e8}.portfolio-inner main{min-height:calc(100svh - 290px)}
+.page-intro{padding-top:58px;padding-bottom:50px;border-bottom:1px solid var(--rule)}.page-kicker{font:10px 'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#75695f;margin:0 0 22px}.page-intro h1{font:700 clamp(68px,10vw,148px)/.92 'Barlow Condensed',Impact,sans-serif;letter-spacing:-.035em;text-transform:uppercase;margin:0 0 23px;max-width:1000px}.page-lead{font-size:16px;line-height:1.7;color:#6b655d;max-width:580px;margin:0}
+.portfolio-inner .about,.portfolio-inner .education,.portfolio-inner .credentials,.portfolio-inner .experience,.portfolio-inner .trajectory{padding-top:50px;padding-bottom:75px}.portfolio-inner .intro{padding-top:30px;padding-bottom:75px}.portfolio-inner .work{padding-top:40px;padding-bottom:75px}.portfolio-inner .contact{padding-top:40px;padding-bottom:75px}.portfolio-inner .cred-heading,.portfolio-inner .edu-intro{margin-top:40px}.portfolio-inner .about-grid{margin-top:40px}.portfolio-inner .experience-intro,.portfolio-inner .trajectory-intro{margin-top:40px}
+.page-next{display:block;padding-block:30px 55px;font-size:21px;text-decoration:underline;text-underline-offset:6px}
+.site-footer{display:block;max-width:none;background:#24221f;color:#f5f0e8;border:0;padding:36px 0;text-transform:none}.footer-layout{display:grid;grid-template-columns:1fr 2fr;gap:26px}.footer-name{font:700 25px Manrope,sans-serif;letter-spacing:-1px}.footer-links{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:15px 24px;font:12px 'DM Sans',sans-serif}.footer-links a:hover{text-decoration:underline}.footer-layout small{grid-column:1/-1;font:9px 'DM Mono',monospace;opacity:.6;text-transform:uppercase}
+@media(max-width:1100px){.page-shell .status{display:none}.page-shell .nav{gap:18px}}
+@media(max-width:800px){.page-shell .nav{gap:12px;font-size:11px}.page-shell .mark{font-size:18px}}
+@media(max-width:680px){.page-shell .nav{gap:12px;font-size:16px;z-index:20;max-height:calc(100svh - 80px);overflow-y:auto}.page-shell .nav a{padding-block:8px}.page-shell .nav a[aria-current=page]:after{bottom:0}.page-intro{padding-block:40px 35px}.page-intro h1{font-size:clamp(60px,16vw,95px)}.page-lead{font-size:14px}.portfolio-inner .about,.portfolio-inner .education,.portfolio-inner .credentials,.portfolio-inner .experience,.portfolio-inner .trajectory{padding-top:35px;padding-bottom:55px}.footer-layout{grid-template-columns:1fr}.footer-links{justify-content:flex-start;gap:15px 20px}.page-next{font-size:18px}}
+/* The skip link precedes the shell, so give the shared shell its own background. */
+.page-shell{background:linear-gradient(180deg,#ff4d00 0%,#ff6200 58%,#ff9208 100%)}
+.portfolio-inner .page-shell{background:#ff4d00}
+.page-shell{padding-inline:clamp(22px,3vw,60px)}
+.about-index{display:flex;flex-wrap:wrap;gap:12px 30px;padding-block:22px;border-bottom:1px solid var(--rule);font:12px 'DM Sans',sans-serif}
+.about-index a{padding-block:5px;border-bottom:1px solid transparent}.about-index a:hover{color:var(--orange);border-bottom-color:currentColor}
+#about,#approach,#experience,#education{scroll-margin-top:24px}
+@media(max-width:680px){.about-index{gap:10px 22px;padding-block:18px;font-size:12px}}

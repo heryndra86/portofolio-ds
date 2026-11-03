@@ -1,0 +1,17 @@
+[
+  {
+    "programme": "AMDAL",
+    "source_page": "https://ppsml.gssd.ui.ac.id/pelatihan-amdal-2/",
+    "local_asset": "amdal-ui.png"
+  },
+  {
+    "programme": "Microsoft PL-300",
+    "source_page": "https://learn.microsoft.com/en-us/credentials/certifications/data-analyst-associate/",
+    "local_asset": "microsoft-associate.svg"
+  },
+  {
+    "programme": "ECBA",
+    "source_page": "https://www.iiba.org/business-analysis-certifications/ecba/",
+    "local_asset": "ecba-original.webp"
+  }
+]

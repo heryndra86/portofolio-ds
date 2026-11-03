@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://data-science-portfolio-gifhari-2026.gifhari2000.chatgpt.site/sitemap.xml

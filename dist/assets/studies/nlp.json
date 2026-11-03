@@ -1,0 +1,631 @@
+{
+  "kind": "new TF-IDF logistic intent classifier + CRF slot baseline",
+  "split": "80/20 grouped holdout; exact normalised utterances kept together; seed 42",
+  "train_examples": 3586,
+  "validation_examples": 892,
+  "group_overlap": 0,
+  "intent_accuracy": 0.9316143497757847,
+  "intent_macro_f1": 0.5658160749026032,
+  "slot_weighted_token_f1_including_O": 0.9686483781530446,
+  "entity_f1": 0.9276425475158386,
+  "intent_details": [
+    {
+      "intent": "atis_flight",
+      "support": 654,
+      "recall": 0.9984709480122325
+    },
+    {
+      "intent": "atis_airfare",
+      "support": 73,
+      "recall": 0.9041095890410958
+    },
+    {
+      "intent": "atis_ground_service",
+      "support": 48,
+      "recall": 0.875
+    },
+    {
+      "intent": "atis_abbreviation",
+      "support": 28,
+      "recall": 0.9285714285714286
+    },
+    {
+      "intent": "atis_airline",
+      "support": 26,
+      "recall": 0.7307692307692307
+    },
+    {
+      "intent": "atis_aircraft",
+      "support": 11,
+      "recall": 0.7272727272727273
+    },
+    {
+      "intent": "atis_flight_time",
+      "support": 10,
+      "recall": 0.0
+    },
+    {
+      "intent": "atis_quantity",
+      "support": 10,
+      "recall": 0.4
+    },
+    {
+      "intent": "atis_flight;atis_airfare",
+      "support": 7,
+      "recall": 0.7142857142857143
+    },
+    {
+      "intent": "atis_airport",
+      "support": 6,
+      "recall": 0.5
+    },
+    {
+      "intent": "atis_capacity",
+      "support": 5,
+      "recall": 0.2
+    },
+    {
+      "intent": "atis_distance",
+      "support": 5,
+      "recall": 0.4
+    },
+    {
+      "intent": "atis_flight_no",
+      "support": 3,
+      "recall": 0.0
+    },
+    {
+      "intent": "atis_city",
+      "support": 2,
+      "recall": 0.5
+    },
+    {
+      "intent": "atis_ground_fare",
+      "support": 2,
+      "recall": 0.5
+    },
+    {
+      "intent": "atis_airline;atis_flight_no",
+      "support": 1,
+      "recall": 0.0
+    },
+    {
+      "intent": "atis_meal",
+      "support": 1,
+      "recall": 0.0
+    }
+  ],
+  "examples": [
+    {
+      "text": "okay i'd like a flight on us air from indianapolis to san diego in the afternoon what's available",
+      "true_intent": "atis_flight",
+      "predicted_intent": "atis_flight",
+      "slots": [
+        {
+          "word": "okay",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "i'd",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "like",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "a",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "flight",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "on",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "us",
+          "truth": "B-airline_name",
+          "prediction": "B-airline_name"
+        },
+        {
+          "word": "air",
+          "truth": "I-airline_name",
+          "prediction": "I-airline_name"
+        },
+        {
+          "word": "from",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "indianapolis",
+          "truth": "B-fromloc.city_name",
+          "prediction": "B-fromloc.city_name"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "san",
+          "truth": "B-toloc.city_name",
+          "prediction": "B-toloc.city_name"
+        },
+        {
+          "word": "diego",
+          "truth": "I-toloc.city_name",
+          "prediction": "I-toloc.city_name"
+        },
+        {
+          "word": "in",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "the",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "afternoon",
+          "truth": "B-depart_time.period_of_day",
+          "prediction": "B-depart_time.period_of_day"
+        },
+        {
+          "word": "what's",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "available",
+          "truth": "O",
+          "prediction": "O"
+        }
+      ]
+    },
+    {
+      "text": "on tuesday what flights leave phoenix to st. paul minnesota and leave after noon",
+      "true_intent": "atis_flight",
+      "predicted_intent": "atis_flight",
+      "slots": [
+        {
+          "word": "on",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "tuesday",
+          "truth": "B-depart_date.day_name",
+          "prediction": "B-depart_date.day_name"
+        },
+        {
+          "word": "what",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "flights",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "leave",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "phoenix",
+          "truth": "B-fromloc.city_name",
+          "prediction": "B-fromloc.city_name"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "st.",
+          "truth": "B-toloc.city_name",
+          "prediction": "B-toloc.city_name"
+        },
+        {
+          "word": "paul",
+          "truth": "I-toloc.city_name",
+          "prediction": "I-toloc.city_name"
+        },
+        {
+          "word": "minnesota",
+          "truth": "B-toloc.state_name",
+          "prediction": "B-toloc.state_name"
+        },
+        {
+          "word": "and",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "leave",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "after",
+          "truth": "B-depart_time.time_relative",
+          "prediction": "B-depart_time.time_relative"
+        },
+        {
+          "word": "noon",
+          "truth": "B-depart_time.time",
+          "prediction": "B-depart_time.time"
+        }
+      ]
+    },
+    {
+      "text": "in the next two days i want to fly from nashville to san jose or to tacoma",
+      "true_intent": "atis_flight",
+      "predicted_intent": "atis_flight",
+      "slots": [
+        {
+          "word": "in",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "the",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "next",
+          "truth": "B-depart_date.date_relative",
+          "prediction": "B-depart_date.date_relative"
+        },
+        {
+          "word": "two",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "days",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "i",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "want",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "fly",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "from",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "nashville",
+          "truth": "B-fromloc.city_name",
+          "prediction": "B-fromloc.city_name"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "san",
+          "truth": "B-toloc.city_name",
+          "prediction": "B-toloc.city_name"
+        },
+        {
+          "word": "jose",
+          "truth": "I-toloc.city_name",
+          "prediction": "I-toloc.city_name"
+        },
+        {
+          "word": "or",
+          "truth": "B-or",
+          "prediction": "B-or"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "tacoma",
+          "truth": "B-toloc.city_name",
+          "prediction": "B-toloc.city_name"
+        }
+      ]
+    },
+    {
+      "text": "how many flights does twa have in business class",
+      "true_intent": "atis_quantity",
+      "predicted_intent": "atis_quantity",
+      "slots": [
+        {
+          "word": "how",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "many",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "flights",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "does",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "twa",
+          "truth": "B-airline_code",
+          "prediction": "B-airline_code"
+        },
+        {
+          "word": "have",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "in",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "business",
+          "truth": "B-class_type",
+          "prediction": "B-class_type"
+        },
+        {
+          "word": "class",
+          "truth": "I-class_type",
+          "prediction": "I-class_type"
+        }
+      ]
+    },
+    {
+      "text": "what flights leave from phoenix",
+      "true_intent": "atis_flight",
+      "predicted_intent": "atis_flight",
+      "slots": [
+        {
+          "word": "what",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "flights",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "leave",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "from",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "phoenix",
+          "truth": "B-fromloc.city_name",
+          "prediction": "B-fromloc.city_name"
+        }
+      ]
+    },
+    {
+      "text": "what are the flights from pittsburgh to denver",
+      "true_intent": "atis_flight",
+      "predicted_intent": "atis_flight",
+      "slots": [
+        {
+          "word": "what",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "are",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "the",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "flights",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "from",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "pittsburgh",
+          "truth": "B-fromloc.city_name",
+          "prediction": "B-fromloc.city_name"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "denver",
+          "truth": "B-toloc.city_name",
+          "prediction": "B-toloc.city_name"
+        }
+      ]
+    },
+    {
+      "text": "i want to fly from milwaukee to orlando on either wednesday evening or thursday morning",
+      "true_intent": "atis_flight",
+      "predicted_intent": "atis_flight",
+      "slots": [
+        {
+          "word": "i",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "want",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "fly",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "from",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "milwaukee",
+          "truth": "B-fromloc.city_name",
+          "prediction": "B-fromloc.city_name"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "orlando",
+          "truth": "B-toloc.city_name",
+          "prediction": "B-toloc.city_name"
+        },
+        {
+          "word": "on",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "either",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "wednesday",
+          "truth": "B-depart_date.day_name",
+          "prediction": "B-depart_date.day_name"
+        },
+        {
+          "word": "evening",
+          "truth": "B-depart_time.period_of_day",
+          "prediction": "B-depart_time.period_of_day"
+        },
+        {
+          "word": "or",
+          "truth": "B-or",
+          "prediction": "B-or"
+        },
+        {
+          "word": "thursday",
+          "truth": "B-depart_date.day_name",
+          "prediction": "B-depart_date.day_name"
+        },
+        {
+          "word": "morning",
+          "truth": "B-depart_time.period_of_day",
+          "prediction": "B-depart_time.period_of_day"
+        }
+      ]
+    },
+    {
+      "text": "what flights are available from denver to san francisco",
+      "true_intent": "atis_flight",
+      "predicted_intent": "atis_flight",
+      "slots": [
+        {
+          "word": "what",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "flights",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "are",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "available",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "from",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "denver",
+          "truth": "B-fromloc.city_name",
+          "prediction": "B-fromloc.city_name"
+        },
+        {
+          "word": "to",
+          "truth": "O",
+          "prediction": "O"
+        },
+        {
+          "word": "san",
+          "truth": "B-toloc.city_name",
+          "prediction": "B-toloc.city_name"
+        },
+        {
+          "word": "francisco",
+          "truth": "I-toloc.city_name",
+          "prediction": "I-toloc.city_name"
+        }
+      ]
+    }
+  ]
+}

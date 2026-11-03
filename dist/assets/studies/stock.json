@@ -1,0 +1,72 @@
+{
+  "kind": "new chronological portfolio baseline",
+  "features": "prior-month numeric stock features and past-only rolling returns; train-fold median imputation",
+  "validation": "six expanding-window calendar-month holdouts; fixed parameters, no tuning on holdout",
+  "future_invariance_check": true,
+  "rows": [
+    {
+      "month": "2023_01",
+      "train_rows": 21306,
+      "validation_rows": 616,
+      "f1": 0.5142857142857142,
+      "baseline_f1": 0.0,
+      "accuracy": 0.5308441558441559,
+      "rmse": 0.1054818032581169,
+      "baseline_rmse": 0.10626749239883183
+    },
+    {
+      "month": "2023_02",
+      "train_rows": 21922,
+      "validation_rows": 616,
+      "f1": 0.3830734966592428,
+      "baseline_f1": 0.0,
+      "accuracy": 0.5503246753246753,
+      "rmse": 0.07170399767526962,
+      "baseline_rmse": 0.07194617831003618
+    },
+    {
+      "month": "2023_03",
+      "train_rows": 22538,
+      "validation_rows": 616,
+      "f1": 0.20803782505910165,
+      "baseline_f1": 0.0,
+      "accuracy": 0.45616883116883117,
+      "rmse": 0.09238133802612129,
+      "baseline_rmse": 0.09221612414489432
+    },
+    {
+      "month": "2023_04",
+      "train_rows": 23154,
+      "validation_rows": 616,
+      "f1": 0.5534591194968553,
+      "baseline_f1": 0.0,
+      "accuracy": 0.538961038961039,
+      "rmse": 0.07485425671970881,
+      "baseline_rmse": 0.07364960543315327
+    },
+    {
+      "month": "2023_05",
+      "train_rows": 23770,
+      "validation_rows": 616,
+      "f1": 0.2328767123287671,
+      "baseline_f1": 0.0,
+      "accuracy": 0.6363636363636364,
+      "rmse": 0.12999151955653496,
+      "baseline_rmse": 0.1295544085005165
+    },
+    {
+      "month": "2023_06",
+      "train_rows": 24386,
+      "validation_rows": 616,
+      "f1": 0.5761772853185596,
+      "baseline_f1": 0.0,
+      "accuracy": 0.5032467532467533,
+      "rmse": 0.08631758822982447,
+      "baseline_rmse": 0.08666623298394097
+    }
+  ],
+  "mean_f1": 0.4113183588580401,
+  "mean_baseline_f1": 0.0,
+  "mean_rmse": 0.09345508391092934,
+  "mean_baseline_rmse": 0.09338334029522884
+}

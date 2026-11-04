@@ -35,10 +35,13 @@ Keep local image paths relative to each HTML page. Preserve the in-progress stat
 
 ## Publishing
 
-Saving a GitHub commit does not automatically publish to the existing chatgpt.site URL. This export includes the existing Sites project identity in .openai/hosting.json, but it does not configure a deployment integration or change the current host. A separate publishing workflow must be selected and connected before cloud edits automatically reach production.
+Public website: https://heryndra86.github.io/portofolio-ds/
 
-The original live portfolio remains at:
-https://data-science-portfolio-gifhari-2026.gifhari2000.chatgpt.site/
+Every push to `main` runs `.github/workflows/pages.yml`: installs the locked dependencies, rebuilds the project lab, checks the site, and publishes only `dist/` to GitHub Pages. Check the repository's Actions tab for deployment status. Failed checks prevent publication. No personal deployment token is required.
+
+GitHub Pages must use **Settings > Pages > Source > GitHub Actions**. Keep asset and navigation paths relative so the project works under `/portofolio-ds/`.
+
+The original chatgpt.site deployment remains separate; GitHub commits update the GitHub Pages website automatically, not that original host. Its existing Sites identity is preserved in `.openai/hosting.json`.
 
 ## Cloud preview
 
